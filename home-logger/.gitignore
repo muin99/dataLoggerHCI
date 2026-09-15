@@ -1,0 +1,6 @@
+.env
+/storage/objects/
+/storage/unknown/
+/storage/receipts/
+/storage/training/
+.DS_Store

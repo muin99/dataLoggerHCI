@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Logger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">HL</span>
+      <span class="brand-name">Home Logger</span>
+    </div>
+    <nav class="nav" id="nav">
+      <button class="nav-link active" data-view="overview">Overview</button>
+      <button class="nav-link" data-view="attendance">Attendance</button>
+      <button class="nav-link" data-view="objects">Objects</button>
+      <button class="nav-link" data-view="receipts">Receipts</button>
+      <button class="nav-link" data-view="notifications">Notifications <span class="nav-badge" id="nav-badge" hidden>0</span></button>
+      <button class="nav-link" data-view="categories">Categories &amp; Workers</button>
+      <button class="nav-link" data-view="settings">Settings</button>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="ghost-btn" id="theme-toggle" type="button">🌓 Toggle theme</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <h1 id="view-title">Overview</h1>
+      <div class="topbar-actions">
+        <span class="status-dot" id="health-dot" title="Checking server..."></span>
+        <span class="status-label" id="health-label">Checking…</span>
+      </div>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section class="view active" data-view="overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Workers on site</div><div class="stat-value" id="stat-on-site">—</div></div>
+        <div class="stat-card"><div class="stat-label">Objects logged today</div><div class="stat-value" id="stat-objects-today">—</div></div>
+        <div class="stat-card"><div class="stat-label">Spend this month</div><div class="stat-value" id="stat-spend">—</div></div>
+        <div class="stat-card accent" id="stat-notify-card"><div class="stat-label">Needs your attention</div><div class="stat-value" id="stat-notify">—</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Recent activity</h2></div>
+        <div class="table-wrap"><table class="data-table" id="feed-table">
+          <thead><tr><th>When</th><th>Type</th><th>Summary</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section class="view" data-view="attendance">
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Household workers</h2>
+            <button class="primary-btn" id="add-worker-btn" type="button">+ Add worker</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="workers-table">
+            <thead><tr><th>Name</th><th>Role</th><th>RFID tag</th><th>Last action</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Attendance log</h2>
+            <div class="attendance-range-controls">
+              <select id="attendance-range">
+                <option value="7">Last 7 days</option>
+                <option value="14" selected>Last 14 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="date">Specific date…</option>
+              </select>
+              <input type="date" id="attendance-date" hidden>
+            </div>
+          </div>
+          <div class="summary-row" id="attendance-summary"></div>
+          <div class="table-wrap"><table class="data-table" id="attendance-table">
+            <thead><tr><th>When</th><th>Worker</th><th>Event</th><th>Source</th><th>Status</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTS -->
+    <section class="view" data-view="objects">
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Object categories</h2>
+            <button class="primary-btn" data-add-category="object" type="button">+ Add category</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="object-categories-table">
+            <thead><tr><th>Name</th><th>Unit price</th><th>Unit</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Log an object manually</h2>
+          </div>
+          <form id="manual-object-form" class="stacked-form">
+            <label>Category
+              <select name="category_id" id="manual-object-category" required></select>
+            </label>
+            <label>Quantity
+              <input type="number" name="quantity" value="1" min="0.01" step="0.01" required>
+            </label>
+            <label>Photo
+              <input type="file" name="image" accept="image/*" required>
+            </label>
+            <button class="primary-btn" type="submit">Save</button>
+          </form>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Recent object logs</h2></div>
+        <div class="table-wrap"><table class="data-table" id="objects-table">
+          <thead><tr><th>Photo</th><th>Category</th><th>Qty</th><th>Total</th><th>Source</th><th>Status</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- RECEIPTS -->
+    <section class="view" data-view="receipts">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Receipts</h2>
+          <select id="receipts-filter">
+            <option value="">All</option>
+            <option value="needs_review">Needs review</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending (on device)</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="table-wrap"><table class="data-table" id="receipts-table">
+          <thead><tr><th>Photo</th><th>Merchant</th><th>Subtotal</th><th>Discount</th><th>Tax</th><th>Total</th><th>Status</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="view" data-view="notifications">
+      <div class="panel">
+        <div class="panel-head"><h2>Unrecognized objects</h2></div>
+        <div class="card-grid" id="unknown-objects-grid"><p class="empty-note">Nothing pending.</p></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Unregistered RFID tags</h2></div>
+        <div class="table-wrap"><table class="data-table" id="unknown-tags-table">
+          <thead><tr><th>Tag UID</th><th>Hits</th><th>Last seen</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Objects awaiting confirmation</h2></div>
+        <p class="muted">Newly captured objects sit here for up to an hour before auto-confirming on their own — resolve them here anytime before that, or a device B5 flag stays here until you do.</p>
+        <div class="table-wrap"><table class="data-table" id="needs-review-objects-table">
+          <thead><tr><th>Photo</th><th>Matched as</th><th>Total</th><th>Status</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Receipts flagged for review</h2></div>
+        <div class="table-wrap"><table class="data-table" id="needs-review-table">
+          <thead><tr><th>Photo</th><th>Merchant</th><th>Total</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES & WORKERS -->
+    <section class="view" data-view="categories">
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Object categories</h2>
+            <button class="primary-btn" data-add-category="object" type="button">+ Add</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="categories-object-table">
+            <thead><tr><th>Name</th><th>Price</th><th>Unit</th><th>Logs</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Attendance roles</h2>
+            <button class="primary-btn" data-add-category="attendance" type="button">+ Add</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="categories-attendance-table">
+            <thead><tr><th>Name</th><th>Workers</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" data-view="settings">
+      <div class="panel">
+        <div class="panel-head"><h2>System settings</h2></div>
+        <form id="settings-form" class="stacked-form">
+          <label>RFID confirm window (seconds)
+            <input type="number" name="confirm_window_seconds" min="3" max="120" required>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" name="sound_notifications"> Sound notifications in this dashboard
+          </label>
+          <button class="primary-btn" type="submit">Save settings</button>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Export data</h2></div>
+        <div class="export-row">
+          <a class="ghost-btn" href="api/logs.php?export=csv&amp;type=objects">Export object logs (CSV)</a>
+          <a class="ghost-btn" href="api/logs.php?export=csv&amp;type=attendance">Export attendance (CSV)</a>
+          <a class="ghost-btn" href="api/logs.php?export=csv&amp;type=receipts">Export receipts (CSV)</a>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Device endpoints reference</h2></div>
+        <p class="muted">Point the ESP32's capture/RFID calls at these paths (relative to this folder):</p>
+        <ul class="endpoint-list">
+          <li><code>POST api/device/rfid.php</code></li>
+          <li><code>POST api/device/resolve_attendance.php</code></li>
+          <li><code>POST api/device/capture.php</code></li>
+          <li><code>POST api/device/resolve_receipt.php</code></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Worker dialog -->
+<dialog id="worker-dialog">
+  <form id="worker-form" class="stacked-form" method="dialog">
+    <h2 id="worker-dialog-title">Add worker</h2>
+    <input type="hidden" name="id">
+    <label>Name <input type="text" name="name" required maxlength="80"></label>
+    <label>Role
+      <select name="role_id" id="worker-role-select"></select>
+    </label>
+    <label>Phone <input type="text" name="phone" maxlength="40"></label>
+    <label>RFID tag UID <input type="text" name="rfid_uid" maxlength="64" placeholder="e.g. 04A3B2C1"></label>
+    <label>Notes <textarea name="notes" maxlength="300"></textarea></label>
+    <div class="dialog-actions">
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" id="worker-save-btn" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Category dialog -->
+<dialog id="category-dialog">
+  <form id="category-form" class="stacked-form" method="dialog">
+    <h2 id="category-dialog-title">Add category</h2>
+    <input type="hidden" name="id">
+    <input type="hidden" name="type">
+    <label>Name <input type="text" name="name" required maxlength="50"></label>
+    <label class="category-price-row" id="category-price-row">Unit price <input type="number" name="price_per_unit" min="0" step="0.01" value="0"></label>
+    <label class="category-price-row" id="category-unit-row">Unit label <input type="text" name="unit_label" value="pcs" maxlength="20"></label>
+    <label>Color <input type="color" name="color" value="#DDF2E6"></label>
+    <div class="dialog-actions">
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Receipt review dialog -->
+<dialog id="receipt-dialog">
+  <div class="receipt-dialog-body">
+    <h2>Receipt</h2>
+    <img id="receipt-image" alt="Receipt photo">
+    <label>Merchant <input type="text" id="receipt-merchant" maxlength="120"></label>
+    <table class="data-table" id="receipt-items-table">
+      <thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Line total</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button class="ghost-btn" id="receipt-add-item" type="button">+ Add item</button>
+    <div class="receipt-breakdown">
+      <div class="receipt-breakdown-row"><span>Subtotal (items)</span><span id="receipt-subtotal-display">0.00</span></div>
+      <div class="receipt-adjustments">
+        <label>Discount <input type="number" id="receipt-discount" min="0" step="0.01" placeholder="0.00"></label>
+        <label>Tax / VAT <input type="number" id="receipt-tax" min="0" step="0.01" placeholder="0.00"></label>
+      </div>
+    </div>
+    <div class="receipt-total">Total: <span id="receipt-total-display">0.00</span></div>
+    <p class="muted" id="receipt-stored-note" hidden></p>
+    <div class="dialog-actions">
+      <button class="ghost-btn danger" id="receipt-delete-btn" type="button">Delete</button>
+      <button class="ghost-btn" id="receipt-close-btn" type="button">Close</button>
+      <button class="primary-btn" id="receipt-save-btn" type="button">Save &amp; confirm</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Object review/edit dialog — used both for objects flagged via device B5
+     and for editing any already-confirmed log from the Objects table; a
+     log is fully CRUD-able regardless of how it got there. -->
+<dialog id="object-review-dialog">
+  <form id="object-review-form" class="stacked-form" method="dialog">
+    <h2 id="object-review-title">Edit object</h2>
+    <input type="hidden" name="id">
+    <img id="object-review-image" alt="Object photo" style="width:100%;max-height:180px;object-fit:contain;border-radius:var(--radius-md);background:var(--paper);">
+    <label>Category
+      <select name="category_id" id="object-review-category" required></select>
+    </label>
+    <label>Quantity
+      <input type="number" name="quantity" min="0.01" step="0.01" required>
+    </label>
+    <div class="dialog-actions">
+      <button class="ghost-btn danger" id="object-review-delete-btn" type="button">Delete</button>
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" type="submit">Save &amp; confirm</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Attendance edit dialog — a log is fully CRUD-able regardless of how it
+     got there (device tap, sweep auto-confirm, or manual entry). -->
+<dialog id="attendance-dialog">
+  <form id="attendance-edit-form" class="stacked-form" method="dialog">
+    <h2>Edit attendance entry</h2>
+    <input type="hidden" name="id">
+    <label>Worker
+      <select name="worker_id" id="attendance-edit-worker" required></select>
+    </label>
+    <label>Event
+      <select name="event_type" required>
+        <option value="check_in">Check in</option>
+        <option value="check_out">Check out</option>
+      </select>
+    </label>
+    <label>When <input type="datetime-local" name="occurred_at" required></label>
+    <label>Note <input type="text" name="note" maxlength="300"></label>
+    <div class="dialog-actions">
+      <button class="ghost-btn danger" id="attendance-delete-btn" type="button">Delete</button>
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Image lightbox -->
+<dialog id="lightbox-dialog">
+  <img id="lightbox-image" alt="Full size">
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>

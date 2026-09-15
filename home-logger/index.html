@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Logger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Icon sprite (feather-style, stroke-based, inherits currentColor) -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="ic-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.7 14.1a5 5 0 0 1 5.3 4.9"/></symbol>
+    <symbol id="ic-box" viewBox="0 0 24 24"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></symbol>
+    <symbol id="ic-receipt" viewBox="0 0 24 24"><path d="M6 3h12v17l-2.5-1.5L13 20l-2.5-1.5L8 20l-2-1.5V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></symbol>
+    <symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="ic-tag" viewBox="0 0 24 24"><path d="M20 12.5L11.5 21 3 12.5V4h8.5z"/><circle cx="7.5" cy="7.5" r="1.4"/></symbol>
+    <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1L15 3h-4l-.3 2.6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 11a8 8 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1L11 21h4l.3-2.6a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6z"/></symbol>
+    <symbol id="ic-menu" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+    <symbol id="ic-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><line x1="9.5" y1="4" x2="9.5" y2="20"/></symbol>
+    <symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4.2"/><line x1="12" y1="19.8" x2="12" y2="22"/><line x1="4" y1="12" x2="1.8" y2="12"/><line x1="22.2" y1="12" x2="20" y2="12"/><line x1="4.9" y1="4.9" x2="3.4" y2="3.4"/><line x1="20.6" y1="20.6" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="3.4" y2="20.6"/><line x1="20.6" y1="3.4" x2="19.1" y2="4.9"/></symbol>
+    <symbol id="ic-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></symbol>
+    <symbol id="ic-wallet" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.3" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="ic-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2L12 3z"/><line x1="12" y1="9.5" x2="12" y2="14"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="ic-x" viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></symbol>
+  </defs>
+</svg>
+
+<div class="app" id="app-shell">
+
+  <div class="scrim" id="scrim"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark">HL</span>
+      <span class="brand-name">Home Logger</span>
+      <button class="icon-btn sidebar-close-btn" id="sidebar-close-btn" type="button" aria-label="Close menu">
+        <svg class="icon"><use href="#ic-x"/></svg>
+      </button>
+    </div>
+    <nav class="nav" id="nav">
+      <button class="nav-link active" data-view="overview" title="Overview"><svg class="icon"><use href="#ic-grid"/></svg><span class="nav-label">Overview</span></button>
+      <button class="nav-link" data-view="attendance" title="Attendance"><svg class="icon"><use href="#ic-users"/></svg><span class="nav-label">Attendance</span></button>
+      <button class="nav-link" data-view="objects" title="Objects"><svg class="icon"><use href="#ic-box"/></svg><span class="nav-label">Objects</span></button>
+      <button class="nav-link" data-view="receipts" title="Receipts"><svg class="icon"><use href="#ic-receipt"/></svg><span class="nav-label">Receipts</span></button>
+      <button class="nav-link" data-view="notifications" title="Notifications"><svg class="icon"><use href="#ic-bell"/></svg><span class="nav-label">Notifications</span> <span class="nav-badge" id="nav-badge" hidden>0</span></button>
+      <button class="nav-link" data-view="categories" title="Categories &amp; Workers"><svg class="icon"><use href="#ic-tag"/></svg><span class="nav-label">Categories &amp; Workers</span></button>
+      <button class="nav-link" data-view="settings" title="Settings"><svg class="icon"><use href="#ic-settings"/></svg><span class="nav-label">Settings</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="sidebar-util-btn" id="sidebar-collapse-btn" type="button" aria-label="Collapse sidebar">
+        <svg class="icon collapse-icon"><use href="#ic-panel"/></svg><span>Collapse</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-toggle" id="menu-toggle" type="button" aria-label="Open menu">
+        <svg class="icon"><use href="#ic-menu"/></svg>
+      </button>
+      <h1 id="view-title">Overview</h1>
+      <div class="topbar-actions">
+        <span class="status-pill"><span class="status-dot" id="health-dot" title="Checking server..."></span><span id="health-label">Checking…</span></span>
+        <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme" title="Toggle color theme">
+          <svg class="icon icon-sun"><use href="#ic-sun"/></svg>
+          <svg class="icon icon-moon"><use href="#ic-moon"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section class="view active" data-view="overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div><div class="stat-label">Workers on site</div><div class="stat-value" id="stat-on-site">—</div></div><span class="stat-icon"><svg class="icon"><use href="#ic-users"/></svg></span></div>
+        <div class="stat-card"><div><div class="stat-label">Objects logged today</div><div class="stat-value" id="stat-objects-today">—</div></div><span class="stat-icon"><svg class="icon"><use href="#ic-box"/></svg></span></div>
+        <div class="stat-card"><div><div class="stat-label">Spend this month</div><div class="stat-value" id="stat-spend">—</div></div><span class="stat-icon"><svg class="icon"><use href="#ic-wallet"/></svg></span></div>
+        <div class="stat-card accent" id="stat-notify-card"><div><div class="stat-label">Needs your attention</div><div class="stat-value" id="stat-notify">—</div></div><span class="stat-icon"><svg class="icon"><use href="#ic-alert"/></svg></span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Recent activity</h2></div>
+        <div class="table-wrap"><table class="data-table" id="feed-table">
+          <thead><tr><th>When</th><th>Type</th><th>Summary</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section class="view" data-view="attendance">
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Household workers</h2>
+            <button class="primary-btn" id="add-worker-btn" type="button">+ Add worker</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="workers-table">
+            <thead><tr><th>Name</th><th>Role</th><th>RFID tag</th><th>Last action</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Attendance log</h2>
+            <div class="attendance-range-controls">
+              <select id="attendance-range">
+                <option value="7">Last 7 days</option>
+                <option value="14" selected>Last 14 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="date">Specific date…</option>
+              </select>
+              <input type="date" id="attendance-date" hidden>
+            </div>
+          </div>
+          <div class="summary-row" id="attendance-summary"></div>
+          <div class="table-wrap"><table class="data-table" id="attendance-table">
+            <thead><tr><th>When</th><th>Worker</th><th>Event</th><th>Source</th><th>Status</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJECTS -->
+    <section class="view" data-view="objects">
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Object categories</h2>
+            <button class="primary-btn" data-add-category="object" type="button">+ Add category</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="object-categories-table">
+            <thead><tr><th>Name</th><th>Unit price</th><th>Unit</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Log an object manually</h2>
+          </div>
+          <form id="manual-object-form" class="stacked-form">
+            <label>Category
+              <select name="category_id" id="manual-object-category" required></select>
+            </label>
+            <label>Quantity
+              <input type="number" name="quantity" value="1" min="0.01" step="0.01" required>
+            </label>
+            <label>Photo
+              <input type="file" name="image" accept="image/*" required>
+            </label>
+            <button class="primary-btn" type="submit">Save</button>
+          </form>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Recent object logs</h2></div>
+        <div class="table-wrap"><table class="data-table" id="objects-table">
+          <thead><tr><th>Photo</th><th>Category</th><th>Qty</th><th>Total</th><th>Source</th><th>Status</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- RECEIPTS -->
+    <section class="view" data-view="receipts">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Receipts</h2>
+          <select id="receipts-filter">
+            <option value="">All</option>
+            <option value="needs_review">Needs review</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending (on device)</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="table-wrap"><table class="data-table" id="receipts-table">
+          <thead><tr><th>Photo</th><th>Merchant</th><th>Subtotal</th><th>Discount</th><th>Tax</th><th>Total</th><th>Status</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="view" data-view="notifications">
+      <div class="panel">
+        <div class="panel-head"><h2>Unrecognized objects</h2></div>
+        <div class="card-grid" id="unknown-objects-grid"><p class="empty-note">Nothing pending.</p></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Unregistered RFID tags</h2></div>
+        <div class="table-wrap"><table class="data-table" id="unknown-tags-table">
+          <thead><tr><th>Tag UID</th><th>Hits</th><th>Last seen</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Objects awaiting confirmation</h2></div>
+        <p class="muted">Newly captured objects sit here for up to an hour before auto-confirming on their own — resolve them here anytime before that, or a device B5 flag stays here until you do.</p>
+        <div class="table-wrap"><table class="data-table" id="needs-review-objects-table">
+          <thead><tr><th>Photo</th><th>Matched as</th><th>Total</th><th>Status</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Receipts flagged for review</h2></div>
+        <div class="table-wrap"><table class="data-table" id="needs-review-table">
+          <thead><tr><th>Photo</th><th>Merchant</th><th>Total</th><th>When</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES & WORKERS -->
+    <section class="view" data-view="categories">
+      <div class="panel-row">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Object categories</h2>
+            <button class="primary-btn" data-add-category="object" type="button">+ Add</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="categories-object-table">
+            <thead><tr><th>Name</th><th>Price</th><th>Unit</th><th>Logs</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Attendance roles</h2>
+            <button class="primary-btn" data-add-category="attendance" type="button">+ Add</button>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="categories-attendance-table">
+            <thead><tr><th>Name</th><th>Workers</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" data-view="settings">
+      <div class="panel">
+        <div class="panel-head"><h2>System settings</h2></div>
+        <form id="settings-form" class="stacked-form">
+          <label>RFID confirm window (seconds)
+            <input type="number" name="confirm_window_seconds" min="3" max="120" required>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" name="sound_notifications"> Sound notifications in this dashboard
+          </label>
+          <button class="primary-btn" type="submit">Save settings</button>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Export data</h2></div>
+        <div class="export-row">
+          <a class="ghost-btn" href="api/logs.php?export=csv&amp;type=objects">Export object logs (CSV)</a>
+          <a class="ghost-btn" href="api/logs.php?export=csv&amp;type=attendance">Export attendance (CSV)</a>
+          <a class="ghost-btn" href="api/logs.php?export=csv&amp;type=receipts">Export receipts (CSV)</a>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Device endpoints reference</h2></div>
+        <p class="muted">Point the ESP32's capture/RFID calls at these paths (relative to this folder):</p>
+        <ul class="endpoint-list">
+          <li><code>POST api/device/rfid.php</code></li>
+          <li><code>POST api/device/resolve_attendance.php</code></li>
+          <li><code>POST api/device/capture.php</code></li>
+          <li><code>POST api/device/resolve_receipt.php</code></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Worker dialog -->
+<dialog id="worker-dialog">
+  <form id="worker-form" class="stacked-form" method="dialog">
+    <h2 id="worker-dialog-title">Add worker</h2>
+    <input type="hidden" name="id">
+    <label>Name <input type="text" name="name" required maxlength="80"></label>
+    <label>Role
+      <select name="role_id" id="worker-role-select"></select>
+    </label>
+    <label>Phone <input type="text" name="phone" maxlength="40"></label>
+    <label>RFID tag UID <input type="text" name="rfid_uid" maxlength="64" placeholder="e.g. 04A3B2C1"></label>
+    <label>Notes <textarea name="notes" maxlength="300"></textarea></label>
+    <div class="dialog-actions">
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" id="worker-save-btn" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Category dialog -->
+<dialog id="category-dialog">
+  <form id="category-form" class="stacked-form" method="dialog">
+    <h2 id="category-dialog-title">Add category</h2>
+    <input type="hidden" name="id">
+    <input type="hidden" name="type">
+    <label>Name <input type="text" name="name" required maxlength="50"></label>
+    <label class="category-price-row" id="category-price-row">Unit price <input type="number" name="price_per_unit" min="0" step="0.01" value="0"></label>
+    <label class="category-price-row" id="category-unit-row">Unit label <input type="text" name="unit_label" value="pcs" maxlength="20"></label>
+    <label>Color <input type="color" name="color" value="#DDF2E6"></label>
+    <div class="dialog-actions">
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Receipt review dialog -->
+<dialog id="receipt-dialog">
+  <div class="receipt-dialog-body">
+    <h2>Receipt</h2>
+    <img id="receipt-image" alt="Receipt photo">
+    <label>Merchant <input type="text" id="receipt-merchant" maxlength="120"></label>
+    <table class="data-table" id="receipt-items-table">
+      <thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Line total</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button class="ghost-btn" id="receipt-add-item" type="button">+ Add item</button>
+    <div class="receipt-breakdown">
+      <div class="receipt-breakdown-row"><span>Subtotal (items)</span><span id="receipt-subtotal-display">0.00</span></div>
+      <div class="receipt-adjustments">
+        <label>Discount <input type="number" id="receipt-discount" min="0" step="0.01" placeholder="0.00"></label>
+        <label>Tax / VAT <input type="number" id="receipt-tax" min="0" step="0.01" placeholder="0.00"></label>
+      </div>
+    </div>
+    <div class="receipt-total">Total: <span id="receipt-total-display">0.00</span></div>
+    <p class="muted" id="receipt-stored-note" hidden></p>
+    <div class="dialog-actions">
+      <button class="ghost-btn danger" id="receipt-delete-btn" type="button">Delete</button>
+      <button class="ghost-btn" id="receipt-close-btn" type="button">Close</button>
+      <button class="primary-btn" id="receipt-save-btn" type="button">Save &amp; confirm</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Object review/edit dialog — used both for objects flagged via device B5
+     and for editing any already-confirmed log from the Objects table; a
+     log is fully CRUD-able regardless of how it got there. -->
+<dialog id="object-review-dialog">
+  <form id="object-review-form" class="stacked-form" method="dialog">
+    <h2 id="object-review-title">Edit object</h2>
+    <input type="hidden" name="id">
+    <img id="object-review-image" alt="Object photo" style="width:100%;max-height:180px;object-fit:contain;border-radius:var(--radius-md);background:var(--surface-2);">
+    <label>Category
+      <select name="category_id" id="object-review-category" required></select>
+    </label>
+    <label>Quantity
+      <input type="number" name="quantity" min="0.01" step="0.01" required>
+    </label>
+    <div class="dialog-actions">
+      <button class="ghost-btn danger" id="object-review-delete-btn" type="button">Delete</button>
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" type="submit">Save &amp; confirm</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Attendance edit dialog — a log is fully CRUD-able regardless of how it
+     got there (device tap, sweep auto-confirm, or manual entry). -->
+<dialog id="attendance-dialog">
+  <form id="attendance-edit-form" class="stacked-form" method="dialog">
+    <h2>Edit attendance entry</h2>
+    <input type="hidden" name="id">
+    <label>Worker
+      <select name="worker_id" id="attendance-edit-worker" required></select>
+    </label>
+    <label>Event
+      <select name="event_type" required>
+        <option value="check_in">Check in</option>
+        <option value="check_out">Check out</option>
+      </select>
+    </label>
+    <label>When <input type="datetime-local" name="occurred_at" required></label>
+    <label>Note <input type="text" name="note" maxlength="300"></label>
+    <div class="dialog-actions">
+      <button class="ghost-btn danger" id="attendance-delete-btn" type="button">Delete</button>
+      <button class="ghost-btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="primary-btn" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Image lightbox -->
+<dialog id="lightbox-dialog">
+  <img id="lightbox-image" alt="Full size">
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>

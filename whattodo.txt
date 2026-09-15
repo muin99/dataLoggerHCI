@@ -1,0 +1,43 @@
+let the B1 button be D12
+b2 butoon d15
+b3 btn d33
+b4 btn d32
+b5 d13
+
+green led in RX2 - GPIO 16
+yellow led in D2
+red led in TX2 - GPIO17
+
+LCD pins are 
+SDA D21
+SCL D22
+
+RFID pins are
+RST D4
+MISO D19
+MOSI D23
+SCK D18
+SDA D5
+
+BUZZER in D14
+
+
+I want a total home logger system a server managed llm ppowered sysotem.. basically the systme initially stays in idle state.. if rfid card is read then lcd will show a timer with written is it accidently triggered if yes hit B3 button.. if within 10s the button is not hit then the attandance will log on the database if hit b3 then the no action needed goes back to idle state..
+if in idle state B1 is hit then it will go to camera state and after placing the camera if the user hit b2 then the image will be sent to the server.. no action needed in between.. the server will send the image in a free image classifier it will check if its a reciept or an object.. if its a receipt the reciept will send to an ocr to read the texts on it.. then the text will be sent in an llm in order to get an accurate json format of the data in it.. basically a reciept will generally contain items, qty and price and a total price.. the data will get back in json format.. then the data will be ready to upddate in the database the lcd will show then 3 option b3 for canceling, b4 for confirm and b5 for modify..
+if hit b3 it will cancel this flow.. if hit b4 the data will be saved in the server if its b5 then the data will be saved in server but a notification will be sent in the application to let tell the user to modify the data.. 
+
+if on the image classifier it is classified as an object previously created it will log the object and set the qty to 1 and previously inputted price will be put there.. basically this object option is for logging daily milk service, newspaper service etc... 
+
+the system acts like a total  home datalogging system.. i have given a reference system this is very poorly designed and not aligned with the hardware.. 
+
+i want you to create a tangible project which will log reciepts, attandances of house hold workers and day to day objects that needs to log.. for objects the class of objects needs to be defined in the systme earlier by the user.. if an undefined object is detected the user should be able to modify directly through the app ..
+
+the physical capacitive touch buttons are necessary to use.. and feedback for button clicks if ti clicked etc etc should be given. use the led bulbs wisely in different stages of the system as well as the buzzer... 
+overall create a total hci project for me..
+
+firstly do the server part. i mean the web application part.. the web app must contain the necessary apis as well.. give me the sql database i will insert in the mysqlphp my admin.. install php if needed and test the entire software part first hitting the apis and if they work.. use free available apis for ocr , llm and image classifier.. but must maintain quality.. use html, css, php, js.. 
+
+check the entire software end to end.. and after that give me the esp32 ino file as well.. i have some files for references in thisdirectory.. you can take reference from them.. but the website must be very beautiful and good looking.. but accurate as well.. 
+you can ask for any clarification.. think as much as you need but need a correct and very accurate system. i dont want any faults.. must maintain all the hci concepts,,, gulf of actions, executions, feedback etc etc.. 
+
+i will upload the php website in my cpanel..

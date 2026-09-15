@@ -1,0 +1,14 @@
+<FilesMatch "^\.env(?:\..*)?$">
+    Require all denied
+</FilesMatch>
+
+# The receipt AI call can take up to ~90s per attempt and now retries up to
+# 3 times (~280s worst case). capture.php already calls set_time_limit(290)
+# itself, but on hosts where mod_php reads this directive it acts as a
+# second safety net against a premature timeout/502.
+<IfModule mod_php.c>
+    php_value max_execution_time 290
+</IfModule>
+<IfModule mod_php7.c>
+    php_value max_execution_time 290
+</IfModule>
