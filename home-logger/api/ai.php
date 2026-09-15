@@ -107,7 +107,7 @@ function hfChatCompletionAttempt(array $messages, int $maxTokens): array
  * reference project's classifier — reference examples visibly improve
  * accuracy on visually similar daily items like milk bottles).
  *
- * @return array{type:'object', category:array, confidence:'high'|'medium'|'low'}|array{type:'receipt'}|array{type:'unknown'}
+ * @return array{type:'object', category:array}|array{type:'receipt'}|array{type:'unknown'}
  */
 function classifyCapture(string $imagePath, string $mime, array $objectCategories, array $trainingExamples): array
 {
@@ -128,8 +128,7 @@ function classifyCapture(string $imagePath, string $mime, array $objectCategorie
     $content[] = [
         'type' => 'text',
         'text' => "Classify the next target image. It is one of three things: (1) a known household object matching one of these category IDs: $allowed; (2) a paper receipt, invoice, or bill with printed text and prices; (3) something that matches neither. "
-            . "You may reason briefly, but you MUST end your response with exactly these two final lines, in this order, nothing after them: "
-            . "CONFIDENCE: <level>\nANSWER: <token> — where <token> is a category ID from the list, or the word RECEIPT, or the word UNKNOWN, and <level> is HIGH, MEDIUM, or LOW reflecting how sure you are <token> is correct (LOW if the photo is blurry, cropped, poorly lit, shows more than one plausible item, or only loosely resembles a reference example rather than clearly matching one). Reference examples above (if any) are verified by users and should guide your object matches.",
+            . "You may reason briefly, but you MUST end your response with a final line in exactly this format, nothing after it: ANSWER: <token> — where <token> is a category ID from the list, or the word RECEIPT, or the word UNKNOWN. Reference examples above (if any) are verified by users and should guide your object matches.",
     ];
     $content[] = ['type' => 'image_url', 'image_url' => ['url' => 'data:' . $mime . ';base64,' . base64_encode($image)]];
 
@@ -169,28 +168,15 @@ function classifyCapture(string $imagePath, string $mime, array $objectCategorie
     }
     $normalized = trim($answerText, " \t\n\r\0\x0B.,\"'`");
 
-    // Same last-marker-wins approach as ANSWER: above, and defaults to
-    // 'medium' (not 'high') whenever the model omits or garbles this line —
-    // an unparseable confidence signal shouldn't be trusted as if it were a
-    // confident one. Only an explicit HIGH skips the review queue.
-    $confidence = 'medium';
-    $confidenceMarkerPos = strripos($combined, 'CONFIDENCE:');
-    if ($confidenceMarkerPos !== false) {
-        $afterConfidence = substr($combined, $confidenceMarkerPos + strlen('CONFIDENCE:'));
-        $confidenceToken = strtolower(trim(substr($afterConfidence, 0, 20), " \t\n\r\0\x0B.,\"'`"));
-        $confidenceToken = strtok($confidenceToken, " \t\n\r");
-        if (in_array($confidenceToken, ['high', 'medium', 'low'], true)) $confidence = $confidenceToken;
-    }
-
     foreach ($objectCategories as $category) {
-        if (str_contains($normalized, $category['public_id'])) return ['type' => 'object', 'category' => $category, 'confidence' => $confidence];
+        if (str_contains($normalized, $category['public_id'])) return ['type' => 'object', 'category' => $category];
     }
     // Longest name first, so "Milk bottle" is checked before a shorter name
     // that might otherwise false-match as a substring of it.
     $sorted = $objectCategories;
     usort($sorted, static fn(array $a, array $b): int => strlen($b['name']) <=> strlen($a['name']));
     foreach ($sorted as $category) {
-        if (stripos($normalized, $category['name']) !== false) return ['type' => 'object', 'category' => $category, 'confidence' => $confidence];
+        if (stripos($normalized, $category['name']) !== false) return ['type' => 'object', 'category' => $category];
     }
 
     if (stripos($normalized, 'RECEIPT') !== false) return ['type' => 'receipt'];

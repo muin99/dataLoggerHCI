@@ -34,7 +34,6 @@
 #include <ArduinoJson.h>
 #include "mbedtls/base64.h"
 #include "esp_heap_caps.h"
-#include "esp_task_wdt.h"
 
 // ---------------- WI-FI CREDENTIALS ----------------
 const char* ssid = "M31";
@@ -50,21 +49,6 @@ const char* apiBase = "https://onukrom.xyz/hci/api";
 // needs to wait at least as long, or the ESP32 gives up and reports a
 // connection error while the server is still legitimately working.
 const int apiTimeoutMs = 310000;
-// How long a raw TCP+TLS connect() may take before giving up. This is
-// separate from apiTimeoutMs (which bounds the slow AI response once a
-// connection already exists) — connect() itself was previously left with NO
-// timeout at all in forwardCaptureToApi() (it calls secureClient.connect()
-// manually, before http.setTimeout() ever runs), so a stalled DNS lookup or
-// TLS handshake could hang the device forever with no way to recover short
-// of a power cycle. 20s is generous for a healthy WiFi network.
-const uint32_t tlsConnectTimeoutMs = 20000;
-// Last-resort self-recovery: if the main loop task ever fails to come back
-// around and reset this (e.g. exactly the connect() hang above, or anything
-// else unforeseen), force a clean reboot instead of sitting frozen until
-// someone physically power-cycles the device. Set comfortably above
-// apiTimeoutMs's own worst case so a legitimately slow (but working) AI call
-// never trips it.
-const uint32_t taskWdtTimeoutMs = 330000;
 
 unsigned long lastWifiCheck = 0;
 const unsigned long wifiCheckInterval = 5000;
@@ -353,14 +337,6 @@ bool beginRequest(HTTPClient& http, WiFiClientSecure& secureClient, const String
     // forwardCaptureToApi(): connect BEFORE allocating the image buffer,
     // so TLS setup never has to compete with it for the same free block.
     secureClient.setInsecure(); // prototype: skips TLS cert validation, see project notes
-    // Bounds connect()/handshake time. Without this, a manual
-    // secureClient.connect() (forwardCaptureToApi() does this itself, before
-    // http.setTimeout() ever runs) has no timeout at all and can hang the
-    // whole device indefinitely on a stalled network. http.setTimeout()
-    // (called later, once actually connected) still overrides this with the
-    // much longer apiTimeoutMs for the slow-AI-response read phase, so this
-    // only affects the connect step.
-    secureClient.setTimeout(tlsConnectTimeoutMs);
     if (!http.begin(secureClient, url)) { Serial.println("[HTTP] begin() failed (https)"); return false; }
     return true;
   }
@@ -471,10 +447,6 @@ void forwardCaptureToApi(const String& base64Data) {
   size_t decodedLen = 0;
   mbedtls_base64_decode(NULL, 0, &decodedLen, (const unsigned char*)base64Data.c_str(), base64Data.length());
   if (decodedLen == 0) { Serial.println("[CAPTURE] empty payload"); captureType = "error"; captureErrorMsg = "Empty image payload"; captureJustCompleted = true; return; }
-  // Checkpoint between the (cheap, on-device) decode-length probe above and
-  // the network connect below — if a future hang ever happens again, whether
-  // this line prints tells us which side of that boundary it's on.
-  Serial.println("[CAPTURE] decoded length=" + String(decodedLen) + ", connecting...");
 
   // Connect BEFORE allocating the (tens-of-KB) image buffer below, while the
   // heap is in its normal, least-pressured state. Confirmed on real
@@ -848,22 +820,12 @@ void setup() {
   mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_max);
 
   randomSeed(analogRead(34));
-
-  // See taskWdtTimeoutMs above: self-recovers from a full device hang
-  // instead of requiring a physical power cycle. Arduino-esp32 3.x may or
-  // may not already have the TWDT initialized (idle-task monitoring is
-  // sometimes on by default) — reconfigure if it is, initialize if not.
-  esp_task_wdt_config_t wdtConfig = { .timeout_ms = taskWdtTimeoutMs, .idle_core_mask = 0, .trigger_panic = true };
-  if (esp_task_wdt_reconfigure(&wdtConfig) == ESP_ERR_INVALID_STATE) esp_task_wdt_init(&wdtConfig);
-  esp_task_wdt_add(NULL); // watch this (loop) task
-
   Serial.println("System ready.");
   resetToIdle();
 }
 
 // ---------------- MAIN LOOP ----------------
 void loop() {
-  esp_task_wdt_reset();
   server.handleClient();
 
   if (millis() - lastWifiCheck > wifiCheckInterval) {
